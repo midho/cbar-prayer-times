@@ -1,112 +1,168 @@
 # CBar Prayer Times
 
-A small CBar plugin that shows the next prayer, its time, and a countdown in the COSMIC panel. Its popup contains today's timetable and the selected calculation settings. It uses the AlAdhan annual calendar service; it does not calculate prayer times itself.
+See the next prayer, its time and a countdown in your COSMIC desktop's panel.
+Click it to see today's timetable. Once the calendars are downloaded, the times
+work without an internet connection.
 
-## Requirements
+This plugin needs Linux with **COSMIC**, **CBar** and **Python 3.10 or newer**.
+It uses the AlAdhan service for prayer times; it does not calculate them itself.
 
-- Linux with COSMIC and CBar already installed.
-- Python 3.10 or newer, using only Python's standard library.
-- System time-zone data for the timezone in your configuration.
+## What it looks like
 
-The installer checks for Python and an executable CBar. It does not download or install CBar. If CBar is not found on `PATH` or at `$HOME/.local/bin/cbar`, set `CBAR_BIN` to its executable path.
+**Compact display**
 
-## Install and configure
+![CBar's compact display showing the next prayer and countdown](docs/screenshots/panel-preview.png)
 
-Download this repository using **Code → Download ZIP** on GitHub and extract it,
-or clone it using the URL shown by GitHub's **Code** button.
+**Click to open the timetable**
 
-From the project folder, run:
+![London demonstration timetable in the real CBar popup](docs/screenshots/timetable.png)
+
+These are cropped screenshots of a separate **London (example)** preview, using
+a fixed demonstration time. They do not show anyone's personal settings. Your
+times will depend on your location, calculation method and the current date.
+
+## Setup
+
+### 1. Make sure CBar is installed
+
+CBar is the small app that puts this plugin in the COSMIC panel.
+If you do not have it yet, follow [CBar's official installation guide](https://github.com/alexandreprates/cbar#quick-install-on-pop_os).
+You do not need to compile CBar from source.
+
+### 2. Download and install this plugin
+
+On this repository's GitHub page, click **Code → Download ZIP**. Extract the ZIP,
+then open a terminal in the extracted folder, the one containing `README.md`.
+
+Run:
 
 ```sh
 bash scripts/install.sh
 ```
 
-The plugin and separate launcher are installed beneath `${XDG_DATA_HOME:-$HOME/.local/share}`. The installer does not create or replace your configuration. If the configuration file is missing, it prints the example-file path and the expected destination. Create the directory and copy the example only when no configuration already exists:
+This installs only the prayer-time plugin and its panel entry. It does not
+install CBar, replace your settings or restart the panel. No `sudo` is needed.
+
+### 3. Set your location
+
+In the same terminal, run this to create your settings file. If you already
+have one, this command keeps it:
 
 ```sh
 config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/cbar-prayer-times"
 mkdir -p "$config_dir"
 if [ ! -e "$config_dir/config.json" ]; then
-  cp "/path/to/cbar-prayer-times/examples/config.json" "$config_dir/config.json"
+  cp examples/config.json "$config_dir/config.json"
 fi
 ```
 
-Replace `/path/to/cbar-prayer-times` with this project's folder. Edit `config.json` for your location. Then add **Prayer Time** to the COSMIC panel using COSMIC panel settings. The launcher is hidden from the app menu. No panel restart is performed by the installer.
-
-The included configuration is labelled **London (example)**. It uses approximate
-demonstration coordinates `51.5`, `-0.1`, timezone `Europe/London`, method `3`
-(Muslim World League), standard Asr `0`, latitude adjustment `3` and midnight mode
-`0`. These are example choices, not a local mosque's timetable. Replace them with
-your own location and preferred calculation settings before using the display.
-
-Configuration fields:
-
-| Field | Meaning |
-| --- | --- |
-| `label` | Name shown in the popup |
-| `latitude`, `longitude` | Location coordinates in decimal degrees |
-| `timezone` | IANA timezone name for your location |
-| `method_id` | Supported AlAdhan calculation method ID |
-| `school_id` | `0` for standard Asr or `1` for Hanafi Asr |
-| `latitude_adjustment_method` | High-latitude adjustment: `1`, `2`, or `3` |
-| `midnight_mode` | `0` for standard or `1` for Jafari |
-
-The plugin validates the configuration. A missing or invalid file produces a short message in CBar instead of a guessed timetable.
-
-## Calendars and refresh
-
-Calendars are kept separately under `${XDG_CACHE_HOME:-$HOME/.cache}/cbar-prayer-times`, in a folder keyed by all selected settings. The plugin prepares the current and following calendar years. Once a valid year is saved, normal panel updates use it without making another request for that year. The saved calendar includes the calculation settings so changing a setting does not reuse an old timetable.
-
-Downloaded calendars remain available offline. If a needed year is not saved and the service cannot be reached, that year's times cannot be shown. A failed request sets a 15-minute retry delay; manual refresh bypasses that delay. A failed refresh keeps any previously valid calendar. The popup reports which years are actually stored.
-
-To refresh both years manually, use the installed plugin and your existing configuration:
+Open that `config.json` in a text editor. With COSMIC's text editor, you can use:
 
 ```sh
-plugin="${XDG_DATA_HOME:-$HOME/.local/share}/cbar-prayer-times/plugins/prayer-times.1m.py"
-config="${XDG_CONFIG_HOME:-$HOME/.config}/cbar-prayer-times/config.json"
-python3 "$plugin" --refresh-cache --config "$config"
+cosmic-edit "$config_dir/config.json"
 ```
 
-`--config PATH` selects another configuration. `--at ISO_DATETIME` selects a date and time for repeatable checks, for example `--at 2026-01-01T12:00:00+00:00`. `--notify` enables the same start and completion notices for `--refresh-cache`, for example `python3 "$plugin" --refresh-cache --config "$config" --notify`; regular panel updates and command-line refreshes without `--notify` stay silent. These options do not bypass the need for a saved calendar or service access when a year is missing.
+The file starts with a **London example**. Change it to your own settings:
 
-## Privacy
+| Setting | What to enter |
+| --- | --- |
+| `label` | Your city name, shown in the popup |
+| `latitude`, `longitude` | Your location's coordinates as numbers |
+| `timezone` | Its timezone name, such as `Europe/London` |
+| `method_id` | Your preferred [AlAdhan calculation method](https://aladhan.com/prayer-times-api) |
+| `school_id` | `0` for standard Asr, or `1` for Hanafi Asr |
 
-The London example is public demonstration data, not a user's configuration.
-Tests use made-up coordinates and timetables. Keep your completed
-configuration, downloaded calendars, screenshots and logs outside this repository.
-The ignore rules exclude local configuration and calendar files, but always review
-files before uploading them.
+**Changing the city name alone does not change the times.** Set the coordinates
+and timezone too. Keep JSON strings in double quotes and numbers without quotes.
+Save the file when you are done.
 
-The refresh menu action passes the selected configuration to the plugin and requests desktop feedback. It immediately shows “Refreshing prayer times…”, then replaces that notice with success only after both years are saved, or failure if the update stops. Native notices use `busctl` and are best effort: a missing service or disabled desktop banners will not stop the refresh. Do Not Disturb settings may hide the banner. The popup also shows when the current saved calendar was last generated; a bad timestamp is shown as unavailable. CBar's action parser cannot safely represent a config path containing both a single quote and a double quote, or a newline; the plugin reports an error for such a path.
+The London example uses approximate coordinates `51.5`, `-0.1`, method `3`
+(Muslim World League), standard Asr `0`, latitude adjustment `3` and midnight mode
+`0`. These are demonstration choices, not a local mosque's timetable. See the
+[full settings reference](docs/configuration.md) for the remaining fields.
 
-## Remove
+### 4. Add it to the panel
 
-Run:
+1. Open **Settings → Desktop → Panel**.
+2. Open **Configure panel applets**.
+3. Choose **Add applet**, find **Prayer Time**, and add it.
+
+**Prayer Time** is a panel applet, so it does not appear in the normal app
+launcher. If you have several monitors, check the other panels too.
+
+### 5. Check the times
+
+Connect to the internet for the first download, then click the prayer display.
+Check the location, calculation method and today's timetable. The popup should
+list the current and following year under **Stored years**.
+
+Compare the results with a trusted local timetable before relying on them.
+Different calculation methods and local practices can give different times.
+
+## Daily use
+
+- The panel shows the next prayer and how long remains.
+- Click it to see all of today's times.
+- Normal updates read the saved calendars; they do not keep downloading them.
+- **Refresh annual cache** downloads both years again. You should see
+  **Refreshing prayer times…**, then **Prayer times updated**, or a failure message.
+- **Last updated** shows when the current calendar was saved. Do Not Disturb can
+  hide desktop banners, so this is another way to check an update.
+
+No automatic adhan sound or prayer alarm is included.
+
+## If something does not work
+
+| Problem | What to check |
+| --- | --- |
+| **Prayer Time** is missing from the applet list | Close and reopen Settings. If it is still missing, save your work, log out and log back in. |
+| You cannot see the display | Check the panel on each monitor. |
+| **Prayer times unavailable** | Check that `config.json` is valid, all settings are filled in, and the first download has internet access. |
+| The city name is right but the times are wrong | Check the coordinates, timezone, calculation method and Asr setting. |
+| Refresh failed | Existing valid calendars are kept. Check your connection, then try **Refresh annual cache** again. |
+| There was no desktop banner | Check Do Not Disturb and the popup's **Last updated** time. |
+
+If a calendar is missing and a download fails, automatic retries wait 15 minutes.
+Manual refresh can try again immediately. A saved year remains available offline.
+
+## Remove it
+
+First remove **Prayer Time** from the panel in Settings. Then, from this project
+folder, run:
 
 ```sh
 bash scripts/uninstall.sh
 ```
 
-Removal deletes only this project's installed plugin file and launcher. It keeps configuration, downloaded calendars, CBar, and any other files in the same directories.
+Your settings, downloaded calendars, CBar and other plugins are kept.
 
-## Accuracy and credits
+## Privacy
 
-Prayer times can differ from local mosque timetables because methods, adjustments, and local practices differ. Check the selected method and compare results with a trusted local source.
+The London example is public demonstration data, not a user's configuration.
+Screenshots are limited to the isolated demo and have no embedded text metadata.
+Keep your real configuration, calendars, desktop captures and logs outside this
+repository. Ignore rules help, but always review files before uploading them.
 
-- [CBar](https://github.com/alexandreprates/cbar), the COSMIC panel applet host.
-- [AlAdhan Prayer Times API](https://aladhan.com/prayer-times-api) and its [credits and terms](https://aladhan.com/credits-and-terms).
+## More detail and development
 
-This project is licensed under **GPL-3.0-only**.
+See [configuration, storage and command-line options](docs/configuration.md).
 
-## Checks and remaining verification
-
-Run the local checks from the project folder:
+Run the checks from the project folder:
 
 ```sh
 bash -n scripts/install.sh scripts/uninstall.sh
 python3 -B -X dev -W error::ResourceWarning -m unittest discover -s tests -v
 ```
 
-The GitHub Actions workflow runs the test suite on Ubuntu 24.04 with Python 3.10 and 3.12. The automated tests use synthetic calendars and temporary user directories. They do not call the live service. Desktop-entry parsing has been checked by launching it through Gio into a fake app, including paths with spaces and special characters.
+GitHub Actions runs the tests on Ubuntu 24.04 with Python 3.10 and 3.12. Tests use
+synthetic calendars and temporary folders, not personal settings or live API
+requests. Real CBar panel, popup and manual-refresh behaviour has also been
+checked on Pop!_OS/COSMIC; this does not guarantee every COSMIC/CBar version.
 
-A side-by-side trial on Pop!_OS/COSMIC confirmed the visible panel text, timetable popup, and start/completion messages from the manual refresh action. These checks do not prove behaviour on every COSMIC/CBar version.
+## Credits and license
+
+- [CBar](https://github.com/alexandreprates/cbar), the COSMIC panel applet host.
+- [AlAdhan Prayer Times API](https://aladhan.com/prayer-times-api) and its
+  [credits, terms and accuracy warning](https://aladhan.com/credits-and-terms).
+
+Licensed under **GPL-3.0-only**. See [LICENSE](LICENSE).
