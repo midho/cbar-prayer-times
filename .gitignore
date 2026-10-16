@@ -1,0 +1,17 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Local editor and test output
+.pytest_cache/
+.coverage
+.venv/
+venv/
+
+# User data and downloaded runtime state (keep the sample config trackable)
+config.json
+!/examples/config.json
+[0-9][0-9][0-9][0-9].json
+*.retry.json
+*.lock
+*.tmp

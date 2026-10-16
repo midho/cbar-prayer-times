@@ -1,0 +1,10 @@
+{
+  "label": "Your location",
+  "latitude": null,
+  "longitude": null,
+  "timezone": null,
+  "method_id": null,
+  "school_id": null,
+  "latitude_adjustment_method": null,
+  "midnight_mode": null
+}
