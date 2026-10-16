@@ -33,11 +33,11 @@ fi
 
 Replace `/path/to/cbar-prayer-times` with this project's folder. Edit `config.json` for your location. Then add **Prayer Time** to the COSMIC panel using COSMIC panel settings. The launcher is hidden from the app menu. No panel restart is performed by the installer.
 
-The example file is a blank template, not a real location. Replace `Your location`
-with a label and every `null` with your own coordinates, timezone and calculation
-choices from the table below. Use numbers for coordinates and calculation IDs,
-and a quoted string for the timezone. The plugin rejects the template until it
-has been completed; it never guesses a location.
+The included configuration is labelled **London (example)**. It uses approximate
+demonstration coordinates `51.5`, `-0.1`, timezone `Europe/London`, method `3`
+(Muslim World League), standard Asr `0`, latitude adjustment `3` and midnight mode
+`0`. These are example choices, not a local mosque's timetable. Replace them with
+your own location and preferred calculation settings before using the display.
 
 Configuration fields:
 
@@ -71,8 +71,8 @@ python3 "$plugin" --refresh-cache --config "$config"
 
 ## Privacy
 
-No personal location or user settings are bundled. The example is intentionally
-blank, and tests use made-up coordinates and timetables. Keep your completed
+The London example is public demonstration data, not a user's configuration.
+Tests use made-up coordinates and timetables. Keep your completed
 configuration, downloaded calendars, screenshots and logs outside this repository.
 The ignore rules exclude local configuration and calendar files, but always review
 files before uploading them.

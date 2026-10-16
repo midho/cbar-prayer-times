@@ -1,10 +1,10 @@
 {
-  "label": "Your location",
-  "latitude": null,
-  "longitude": null,
-  "timezone": null,
-  "method_id": null,
-  "school_id": null,
-  "latitude_adjustment_method": null,
-  "midnight_mode": null
+  "label": "London (example)",
+  "latitude": 51.5,
+  "longitude": -0.1,
+  "timezone": "Europe/London",
+  "method_id": 3,
+  "school_id": 0,
+  "latitude_adjustment_method": 3,
+  "midnight_mode": 0
 }
